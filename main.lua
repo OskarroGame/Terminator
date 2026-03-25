@@ -36,6 +36,14 @@ function love.update(dt)
 
     if love.keyboard.isDown("d") then move_right(dt) end
     if love.keyboard.isDown("a") then move_left(dt) end
+    if love.keyboard.isDown("w") then move_up(dt) end
+    if love.keyboard.isDown("s") then move_down(dt) end
+
+    for i, v in ipairs(viruses) do
+        if math.abs(player.x - v.x) < 40 and math.abs(player.y + -v.y) < 55 then
+            table.remove(viruses, i)
+        end
+    end
 end
 
 function move_right(dt)
@@ -44,6 +52,14 @@ end
 
 function move_left(dt)
     player.x = player.x - player.spd * dt
+end
+
+function move_up(dt)
+    player.y = player.y - player.spd * dt
+end
+
+function move_down(dt)
+    player.y = player.y + player.spd * dt
 end
 
 function love.draw()
@@ -58,6 +74,7 @@ function love.draw()
 
     -- Wirusy
     for i, v in ipairs(viruses) do
+        local v = viruses[i]
         if v.type == "green" then
             love.graphics.setColor(1, 1, 1)
             love.graphics.circle("fill", v.x, v.y, 15, 15)

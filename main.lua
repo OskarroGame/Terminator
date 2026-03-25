@@ -40,7 +40,7 @@ function love.update(dt)
     if love.keyboard.isDown("s") then move_down(dt) end
 
     for i, v in ipairs(viruses) do
-        if math.abs(player.x - v.x) < 40 and math.abs(player.y + -v.y) < 55 then
+        if math.abs(player.x - v.x) < 45 and math.abs(player.y - v.y) < 60 then
             table.remove(viruses, i)
         end
     end

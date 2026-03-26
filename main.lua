@@ -6,7 +6,8 @@ function love.load()
         x = love.graphics.getWidth() / 2,
         y = love.graphics.getHeight() / 2,
         spd = 200,
-        sprite = love.graphics.newImage("Gracz.png")
+        sprite = love.graphics.newImage("Gracz.png"),
+        hp = 100
     }
     viruses = {}
 
@@ -63,6 +64,7 @@ function move_down(dt)
 end
 
 function love.draw()
+    love.graphics.setColor(1, 1, 1)
     -- Tło
     love.graphics.setBackgroundColor(0, 1, 0.8)
 
@@ -88,4 +90,12 @@ function love.draw()
     -- Pasek
     love.graphics.setColor(1, 0.8, 0)
     love.graphics.rectangle("fill", 10, 10, cpuUsage * 2, 30)
+
+    -- HP Ramka
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.rectangle("line", 10, 560, 200, 30)
+
+    -- Pasek HP
+    love.graphics.setColor(1, 0, 0)
+    love.graphics.rectangle("fill", 10, 560, player.hp * 2, 30)
 end

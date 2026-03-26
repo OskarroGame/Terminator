@@ -2,6 +2,7 @@ function love.load()
     math.randomseed(os.time())
     love.graphics.setDefaultFilter("nearest", "nearest")
     love.window.setTitle("Terminator")
+    virusSprite = love.graphics.newImage("Violet_Virus.png")
     player = {
         x = love.graphics.getWidth() / 2,
         y = love.graphics.getHeight() / 2,
@@ -14,7 +15,8 @@ function love.load()
     wirus = {
         x = math.random(0, love.graphics.getWidth() - 100),
         y = math.random(0, love.graphics.getHeight() - 50),
-        type = "green"
+        type = "violet",
+        sprite = virusSprite
     }
     table.insert(viruses, wirus)
 
@@ -29,7 +31,8 @@ function love.update(dt)
             x = math.random(0, love.graphics.getWidth() - 100),
             y = math.random(0, love.graphics.getHeight() - 50),
             type =
-            "green"
+            "violet",
+            sprite = virusSprite
         }
         table.insert(viruses, nowy)
         timer = 0
@@ -40,8 +43,9 @@ function love.update(dt)
     if love.keyboard.isDown("w") then move_up(dt) end
     if love.keyboard.isDown("s") then move_down(dt) end
 
-    for i, v in ipairs(viruses) do
-        if math.abs(player.x - v.x) < 45 and math.abs(player.y - v.y) < 60 then
+    for i = #viruses, 1, -1 do
+        local v = viruses[i]
+        if math.abs(player.x - v.x) < 35 and math.abs(player.y - v.y) < 35 then
             table.remove(viruses, i)
         end
     end
@@ -76,10 +80,10 @@ function love.draw()
 
     -- Wirusy
     for i, v in ipairs(viruses) do
-        local v = viruses[i]
-        if v.type == "green" then
-            love.graphics.setColor(1, 1, 1)
-            love.graphics.circle("fill", v.x, v.y, 15, 15)
+        local vox = v.sprite:getWidth() / 2
+        local voy = v.sprite:getHeight() / 2
+        if v.type == "violet" then
+            love.graphics.draw(v.sprite, v.x, v.y, 0, 5, 5, vox, voy)
         end
     end
 

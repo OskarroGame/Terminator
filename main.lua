@@ -20,11 +20,12 @@ function love.load()
     }
     table.insert(viruses, wirus)
 
-    cpuUsage = 0
+    cpuUsage = #viruses
     timer = 0
 end
 
 function love.update(dt)
+    cpuUsage = #viruses
     timer = timer + dt
     if timer >= 2 then
         nowy = {

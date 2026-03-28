@@ -127,8 +127,9 @@ function love.draw()
 
     -- Koniec gry
     if stan == "game_over" then
+        love.graphics.setBackgroundColor(0, 0.2, 0.2)
         love.graphics.setColor(1, 1, 1)
         love.graphics.setFont(czcionka)
-        love.graphics.print("Game Over", love.graphics.getWidth() / 2, love.graphics.getHeight() / 2)
+        love.graphics.print("Game Over", love.graphics.getWidth() / 2 - 60, love.graphics.getHeight() / 2 - 60)
     end
 end

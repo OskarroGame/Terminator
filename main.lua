@@ -22,6 +22,7 @@ function love.load()
 
     cpuUsage = #viruses
     timer = 0
+    czcionka = love.graphics.newFont(32)
 end
 
 function love.update(dt)
@@ -46,8 +47,13 @@ function love.update(dt)
 
     for i = #viruses, 1, -1 do
         local v = viruses[i]
-        if math.abs(player.x - v.x) < 35 and math.abs(player.y - v.y) < 35 then
-            table.remove(viruses, i)
+        if math.abs(player.x - v.x) < 55 and math.abs(player.y - v.y) < 55 then
+            if love.keyboard.isDown("e") then
+                table.remove(viruses, i)
+            end
+        end
+        if math.abs(player.x - v.x) < 40 and math.abs(player.y - v.y) < 40 then
+            player.hp = player.hp - 0.1
         end
     end
 end
@@ -85,6 +91,12 @@ function love.draw()
         local voy = v.sprite:getHeight() / 2
         if v.type == "violet" then
             love.graphics.draw(v.sprite, v.x, v.y, 0, 5, 5, vox, voy)
+        end
+
+        if math.abs(player.x - v.x) < 55 and math.abs(player.y - v.y) < 55 then
+            love.graphics.setColor(1, 1, 1)
+            love.graphics.setFont(czcionka)
+            love.graphics.print("Press E to terminate", v.x, v.y - 15)
         end
     end
 

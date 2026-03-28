@@ -51,6 +51,10 @@ function love.update(dt)
             stan = "game_over"
         end
 
+        if cpuUsage >= 100 then
+            stan = "game_over"
+        end
+
         for i = #viruses, 1, -1 do
             local v = viruses[i]
             if math.abs(player.x - v.x) < 55 and math.abs(player.y - v.y) < 55 then

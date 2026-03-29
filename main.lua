@@ -2,6 +2,8 @@ function love.load()
     math.randomseed(os.time())
     love.graphics.setDefaultFilter("nearest", "nearest")
     love.window.setTitle("Terminator")
+
+    shaders = require("shaders")
     virusSprite = love.graphics.newImage("Violet_Virus.png")
     player = {
         x = love.graphics.getWidth() / 2,
@@ -94,19 +96,31 @@ function love.draw()
         local ox = player.sprite:getWidth() / 2
         local oy = player.sprite:getHeight() / 2
 
+
         -- Gracz
         love.graphics.draw(player.sprite, player.x, player.y, 0, 3, 3, ox, oy)
 
-        -- Wirusy
+        -- Wirusy (przed nakładką — w kole światła widać je normalnie przez wycięcie)
+        love.graphics.setColor(1, 1, 1)
         for i, v in ipairs(viruses) do
             local vox = v.sprite:getWidth() / 2
             local voy = v.sprite:getHeight() / 2
             if v.type == "violet" then
                 love.graphics.draw(v.sprite, v.x, v.y, 0, 5, 5, vox, voy)
             end
+        end
 
+        -- nakładka (światło na pozycji gracza)
+        love.graphics.setShader(shaders.light)
+        shaders.light:send("light_center", { player.x, player.y })
+        shaders.light:send("light_radius", 130)
+        love.graphics.setColor(0, 0, 0, 0.75)
+        love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
+        love.graphics.setShader()
+        love.graphics.setColor(1, 1, 1)
+
+        for i, v in ipairs(viruses) do
             if math.abs(player.x - v.x) < 55 and math.abs(player.y - v.y) < 55 then
-                love.graphics.setColor(1, 1, 1)
                 love.graphics.setFont(czcionka)
                 love.graphics.print("Press E to terminate", v.x, v.y - 15)
             end

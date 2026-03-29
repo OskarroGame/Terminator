@@ -139,7 +139,14 @@ function love.draw()
         love.graphics.rectangle("line", 10, 560, 200, 30)
 
         -- Pasek HP
-        love.graphics.setColor(1, 0, 0)
+        if player.hp <= 50 then
+            love.graphics.setColor(1, 1, 0.25)
+        else
+            love.graphics.setColor(1, 0.2, 0)
+        end
+        if player.hp <= 35 then
+            love.graphics.setColor(0, 0.8, 1)
+        end
         love.graphics.rectangle("fill", 10, 560, player.hp * 2, 30)
     end
 

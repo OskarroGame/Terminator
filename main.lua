@@ -22,7 +22,9 @@ function love.load()
     }
     table.insert(viruses, wirus)
 
-    stan = ""
+    stan = "game"
+    cpuUsage = 0
+    cpuFillWidth = math.min(200, cpuUsage * 2)
     cpuUsage = #viruses
     timer = 0
     gameTimer = 0
@@ -31,7 +33,7 @@ function love.load()
 end
 
 function love.update(dt)
-    if stan == "" then
+    if stan == "game" then
         cpuUsage = #viruses
         gameTimer = gameTimer + dt
         timer = timer + dt
@@ -45,8 +47,8 @@ function love.update(dt)
 
         if timer >= time_to_spawn then
             nowy = {
-                x = math.random(0, love.graphics.getWidth() - 100),
-                y = math.random(0, love.graphics.getHeight() - 50),
+                x = math.random(0, math.abs(love.graphics.getWidth() - 100)),
+                y = math.random(0, math.abs(love.graphics.getHeight() - 50)),
                 type =
                 "violet",
                 sprite = virusSprite
@@ -69,7 +71,7 @@ function love.update(dt)
         end
 
         local pulse = player.hp * 1.5 + math.sin(love.timer.getTime() * 5) * 10
-        shaders.light:send("light_radius", pulse)
+        shaders.light:send("light_radius", math.abs(pulse))
 
         for i = #viruses, 1, -1 do
             local v = viruses[i]
@@ -79,7 +81,7 @@ function love.update(dt)
                 end
             end
             if math.abs(player.x - v.x) < 40 and math.abs(player.y - v.y) < 40 then
-                player.hp = player.hp - 0.1
+                player.hp = player.hp - 0.1 * dt
             end
         end
     end
@@ -106,7 +108,8 @@ function love.draw()
     -- Tło
     love.graphics.setBackgroundColor(0.2, 0.4, 0.8) -- A soft blue
 
-    if stan == "" then
+    if stan == "game" then
+        cpuFillWidth = math.min(200, cpuUsage * 2)
         local ox = player.sprite:getWidth() / 2
         local oy = player.sprite:getHeight() / 2
 
@@ -145,7 +148,7 @@ function love.draw()
 
         -- Pasek
         love.graphics.setColor(1, 0.8, 0)
-        love.graphics.rectangle("fill", 10, 10, cpuUsage * 2, 30)
+        love.graphics.rectangle("fill", 10, 10, cpuFillWidth, 30)
 
         -- HP Ramka
         love.graphics.setColor(1, 1, 1)

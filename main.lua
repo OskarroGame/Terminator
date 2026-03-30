@@ -25,14 +25,25 @@ function love.load()
     stan = ""
     cpuUsage = #viruses
     timer = 0
+    gameTimer = 0
+    time_to_spawn = 2
     czcionka = love.graphics.newFont(32)
 end
 
 function love.update(dt)
     if stan == "" then
         cpuUsage = #viruses
+        gameTimer = gameTimer + dt
         timer = timer + dt
-        if timer >= 2 then
+        if gameTimer >= 180 then
+            time_to_spawn = 1.2
+        elseif gameTimer >= 120 then
+            time_to_spawn = 1.6
+        elseif gameTimer >= 60 then
+            time_to_spawn = 1.8
+        end
+
+        if timer >= time_to_spawn then
             nowy = {
                 x = math.random(0, love.graphics.getWidth() - 100),
                 y = math.random(0, love.graphics.getHeight() - 50),
@@ -56,6 +67,9 @@ function love.update(dt)
         if cpuUsage >= 100 then
             stan = "game_over"
         end
+
+        local pulse = player.hp * 1.5 + math.sin(love.timer.getTime() * 5) * 10
+        shaders.light:send("light_radius", pulse)
 
         for i = #viruses, 1, -1 do
             local v = viruses[i]
@@ -113,7 +127,6 @@ function love.draw()
         -- nakładka (światło na pozycji gracza)
         love.graphics.setShader(shaders.light)
         shaders.light:send("light_center", { player.x, player.y })
-        shaders.light:send("light_radius", 130)
         love.graphics.setColor(0, 0, 0, 0.75)
         love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
         love.graphics.setShader()

@@ -30,6 +30,7 @@ function love.load()
     timer = 0
     gameTimer = 0
     time_to_spawn = 2
+    xd = 0
     delete = false
     czcionka = love.graphics.newFont(32)
 end
@@ -89,15 +90,22 @@ function love.update(dt)
             local touchRadius = playerRadius + virusRadius
 
             if distSq <= (touchRadius * touchRadius) then
-                if (player.x - v.x <= 15 and player.y - v.y <= 15) or (player.x - v.x >= 15 and player.y - v.y >= 15) then
-                    if love.keyboard.isDown("e") then
-                        table.remove(viruses, i)
-                        delete = true
-                    end
+                if love.keyboard.isDown("e") then
+                    table.remove(viruses, i)
+                    delete = true
+                    xd = 0.1
+                else
+                    player.hp = player.hp - 1 * dt -- Wirus gryzie
+                    delete = false
                 end
-            else
-                player.hp = player.hp - 1 * dt
             end
+        end
+
+        if xd > 0 then
+            xd = xd - dt
+        else
+            delete = false
+            xd = 0
         end
     end
 end
@@ -136,7 +144,18 @@ function love.draw()
 
 
         -- Gracz
+        if delete == true then
+            love.graphics.setShader(shaders.whiteout)
+        end
         love.graphics.draw(player.sprite, player.x, player.y, 0, 3, 3, ox, oy)
+        love.graphics.setShader()
+        love.graphics.setShader(shaders.light)
+        shaders.light:send("light_center", { player.x, player.y })
+        love.graphics.setColor(0, 0, 0, 0.75)
+        love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
+        love.graphics.setShader()
+        love.graphics.setColor(1, 1, 1)
+
 
         -- Wirusy (przed nakładką — w kole światła widać je normalnie przez wycięcie)
         love.graphics.setColor(1, 1, 1)
@@ -147,14 +166,6 @@ function love.draw()
                 love.graphics.draw(v.sprite, v.x, v.y, 0, 5, 5, vox, voy)
             end
         end
-
-        -- nakładka (światło na pozycji gracza)
-        love.graphics.setShader(shaders.light)
-        shaders.light:send("light_center", { player.x, player.y })
-        love.graphics.setColor(0, 0, 0, 0.75)
-        love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
-        love.graphics.setShader()
-        love.graphics.setColor(1, 1, 1)
 
         for i, v in ipairs(viruses) do
             local virusRadius = (v.sprite:getWidth() * virusScale) / 2

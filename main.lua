@@ -73,15 +73,25 @@ function love.update(dt)
         local pulse = player.hp * 1.5 + math.sin(love.timer.getTime() * 5) * 10
         shaders.light:send("light_radius", math.abs(pulse))
 
+        local playerScale = 3
+        local virusScale = 5
+        local playerRadius = (player.sprite:getWidth() * playerScale) / 2
+
         for i = #viruses, 1, -1 do
             local v = viruses[i]
-            if math.abs(player.x - v.x) < 55 and math.abs(player.y - v.y) < 55 then
+
+            local virusRadius = (v.sprite:getWidth() * virusScale) / 2
+            local dx = player.x - v.x
+            local dy = player.y - v.y
+            local distSq = dx * dx + dy * dy
+            local touchRadius = playerRadius + virusRadius
+
+            if distSq <= (touchRadius * touchRadius) then
                 if love.keyboard.isDown("e") then
                     table.remove(viruses, i)
+                else
+                    player.hp = player.hp - 1 * dt
                 end
-            end
-            if math.abs(player.x - v.x) < 40 and math.abs(player.y - v.y) < 40 then
-                player.hp = player.hp - 0.1 * dt
             end
         end
     end
@@ -110,6 +120,9 @@ function love.draw()
 
     if stan == "game" then
         cpuFillWidth = math.min(200, cpuUsage * 2)
+        local playerScale = 3
+        local virusScale = 5
+        local playerRadius = (player.sprite:getWidth() * playerScale) / 2
         local ox = player.sprite:getWidth() / 2
         local oy = player.sprite:getHeight() / 2
 
@@ -136,7 +149,13 @@ function love.draw()
         love.graphics.setColor(1, 1, 1)
 
         for i, v in ipairs(viruses) do
-            if math.abs(player.x - v.x) < 55 and math.abs(player.y - v.y) < 55 then
+            local virusRadius = (v.sprite:getWidth() * virusScale) / 2
+            local dx = player.x - v.x
+            local dy = player.y - v.y
+            local distSq = dx * dx + dy * dy
+            local touchRadius = playerRadius + virusRadius
+
+            if distSq <= (touchRadius * touchRadius) then
                 love.graphics.setFont(czcionka)
                 love.graphics.print("Press E to terminate", v.x, v.y - 15)
             end

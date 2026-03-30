@@ -1,7 +1,7 @@
 function love.load()
     math.randomseed(os.time())
     love.graphics.setDefaultFilter("nearest", "nearest")
-    love.window.setTitle("Terminator")
+    love.window.setIcon(love.image.newImageData("Violet_Virus.png"))
 
     shaders = require("shaders")
     virusSprite = love.graphics.newImage("Violet_Virus.png")
@@ -115,6 +115,9 @@ end
 
 function love.draw()
     love.graphics.setColor(1, 1, 1)
+
+    love.graphics.setFont(czcionka)
+    love.graphics.print("FPS:" .. love.timer.getFPS(), 650, 10)
     -- Tło
     love.graphics.setBackgroundColor(0.2, 0.4, 0.8) -- A soft blue
 

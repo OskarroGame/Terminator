@@ -1,7 +1,8 @@
 function love.load()
     math.randomseed(os.time())
     love.graphics.setDefaultFilter("nearest", "nearest")
-    love.window.setIcon(love.image.newImageData("Violet_Virus.png"))
+    love.window.setIcon(love.image.newImageData("icon.png"))
+    love.mouse.setVisible(false)
 
     shaders = require("shaders")
     virusSprite = love.graphics.newImage("Violet_Virus.png")
@@ -29,6 +30,7 @@ function love.load()
     timer = 0
     gameTimer = 0
     time_to_spawn = 2
+    delete = false
     czcionka = love.graphics.newFont(32)
 end
 
@@ -87,11 +89,14 @@ function love.update(dt)
             local touchRadius = playerRadius + virusRadius
 
             if distSq <= (touchRadius * touchRadius) then
-                if love.keyboard.isDown("e") then
-                    table.remove(viruses, i)
-                else
-                    player.hp = player.hp - 1 * dt
+                if (player.x - v.x <= 15 and player.y - v.y <= 15) or (player.x - v.x >= 15 and player.y - v.y >= 15) then
+                    if love.keyboard.isDown("e") then
+                        table.remove(viruses, i)
+                        delete = true
+                    end
                 end
+            else
+                player.hp = player.hp - 1 * dt
             end
         end
     end
@@ -159,8 +164,10 @@ function love.draw()
             local touchRadius = playerRadius + virusRadius
 
             if distSq <= (touchRadius * touchRadius) then
-                love.graphics.setFont(czcionka)
-                love.graphics.print("Press E to terminate", v.x, v.y - 15)
+                if (player.x - v.x <= 15 and player.y - v.y <= 15) or (player.x - v.x >= 15 and player.y - v.y >= 15) then
+                    love.graphics.setFont(czcionka)
+                    love.graphics.print("Press E to terminate", v.x, v.y - 15)
+                end
             end
         end
 

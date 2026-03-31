@@ -88,7 +88,9 @@ function love.update(dt)
             local dx = player.x - v.x
             local dy = player.y - v.y
             local distSq = dx * dx + dy * dy
-            local touchRadius = 40
+            local playerRadius = (player.sprite:getWidth() * playerScale) / 2
+            local virusRadius = (v.sprite:getWidth() * virusScale) / 2
+            local touchRadius = playerRadius + virusRadius
 
             if distSq <= (touchRadius * touchRadius) then
                 if love.keyboard.isDown("e") then
@@ -181,16 +183,15 @@ function love.draw()
 
         for i, v in ipairs(viruses) do
             local virusRadius = (v.sprite:getWidth() * virusScale) / 2
+            local playerRadius = (player.sprite:getWidth() * playerScale) / 2
             local dx = player.x - v.x
             local dy = player.y - v.y
             local distSq = dx * dx + dy * dy
-            local touchRadius = 40
+            local touchRadius = playerRadius + virusRadius
 
             if distSq <= (touchRadius * touchRadius) then
-                if (player.x - v.x <= 15 and player.y - v.y <= 15) or (player.x - v.x >= 15 and player.y - v.y >= 15) then
-                    love.graphics.setFont(czcionka)
-                    love.graphics.print("Press E to terminate", v.x, v.y - 15)
-                end
+                love.graphics.setFont(czcionka)
+                love.graphics.print("Press E to terminate", v.x, v.y - 15)
             end
         end
 
@@ -203,7 +204,7 @@ function love.draw()
             local cpuRed = math.random()
             local cpuGreen = math.random()
             local cpuBlue = math.random()
-            love.graphics.setColor(cpuColor, cpuGreen, cpuBlue)
+            love.graphics.setColor(cpuRed, cpuGreen, cpuBlue)
         elseif cpuUsage >= 50 then
             love.graphics.setColor(0, 1, 0)
         else

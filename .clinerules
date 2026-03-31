@@ -1,0 +1,32 @@
+# Love2D & Lua Development Rules
+
+Follow these guidelines for LÖVE (Love2D) and Lua 5.1/JIT development.
+
+## Interaction Rules
+- **Crucial**: NEVER provide large blocks of code or full file implementations unless specifically asked. 
+- **Always ask**: "Would you like me to provide the code for this?" before generating any code snippets.
+- **Wait for confirmation**: Only provide the code after I confirm with "Yes" or a similar prompt.
+
+## General Rules
+- **LÖVE Version**: Assume the latest stable version (currently 11.5).
+- **Coding Style**: Use 4 spaces for indentation (StyLua compatible).
+- **Modularity**: Use `require` for module management. Every module should return a table or a function.
+
+## Love2D Specifics
+- **Callbacks**: Follow the standard structure: `love.load`, `love.update(dt)`, and `love.draw`.
+- **Delta Time**: Always use the `dt` parameter in `love.update` for frame-rate independent movement (e.g., `x = x + speed * dt`).
+- **Colors**: Remember that LÖVE uses the 0-1 range for colors (not 0-255).
+- **Assets**: Use relative paths for loading assets (e.g., `love.graphics.newImage("assets/hero.png")`).
+
+## AI Context & Optimization
+- Always verify API usage against: https://love2d.org.
+- Adapt to external libraries if present (e.g., `hump`, `bump`, `bitser`, `flux`).
+- **Memory Management**: Avoid creating new tables or objects inside `love.update` or `love.draw` to prevent Garbage Collector (GC) spikes.
+
+## Formatting (StyLua)
+- Use double quotes for strings: `"example"`.
+- Add spaces after commas and around operators: `local x = 10 + y`.
+
+## Debugging
+- Suggest using `print()` for console logging or the integrated debugger if the game crashes.
+- Check for missing `end` keywords as the primary cause of syntax errors.

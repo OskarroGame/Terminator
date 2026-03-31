@@ -76,6 +76,7 @@ function love.update(dt)
 
         local pulse = player.hp * 1.5 + math.sin(love.timer.getTime() * 5) * 10
         shaders.light:send("light_radius", math.abs(pulse))
+        shaders.light:send("light_center", { player.x, player.y })
 
         local playerScale = 3
         local virusScale = 5
@@ -84,15 +85,12 @@ function love.update(dt)
         for i = #viruses, 1, -1 do
             local v = viruses[i]
 
-            local virusRadius = (v.sprite:getWidth() * virusScale) / 2
             local dx = player.x - v.x
             local dy = player.y - v.y
-            local distSq = dx * dx + dy * dy
-            local playerRadius = (player.sprite:getWidth() * playerScale) / 2
-            local virusRadius = (v.sprite:getWidth() * virusScale) / 2
-            local touchRadius = playerRadius + virusRadius
+            local dist = math.sqrt(dx * dx + dy * dy)
+            local collisionDistance = 50 -- Stała odległość kolizji
 
-            if distSq <= (touchRadius * touchRadius) then
+            if dist <= collisionDistance then
                 if love.keyboard.isDown("e") then
                     table.remove(viruses, i)
                     delete = true
@@ -115,6 +113,31 @@ function love.update(dt)
             close_to_end = true
         else
             close_to_end = false
+        end
+    end
+
+    if stan == "game_over" then
+        if love.keyboard.isDown("r") then
+            -- Resetuj całą grę
+            player.hp = 100
+            player.x = love.graphics.getWidth() / 2
+            player.y = love.graphics.getHeight() / 2
+            viruses = {}
+            wirus = {
+                x = math.random(0, love.graphics.getWidth() - 100),
+                y = math.random(0, love.graphics.getHeight() - 50),
+                type = "violet",
+                sprite = virusSprite
+            }
+            table.insert(viruses, wirus)
+            timer = 0
+            gameTimer = 0
+            time_to_spawn = 2
+            cpuUsage = 0
+            xd = 0
+            delete = false
+            close_to_end = false
+            stan = "game"
         end
     end
 end
@@ -182,14 +205,12 @@ function love.draw()
         end
 
         for i, v in ipairs(viruses) do
-            local virusRadius = (v.sprite:getWidth() * virusScale) / 2
-            local playerRadius = (player.sprite:getWidth() * playerScale) / 2
             local dx = player.x - v.x
             local dy = player.y - v.y
-            local distSq = dx * dx + dy * dy
-            local touchRadius = playerRadius + virusRadius
+            local dist = math.sqrt(dx * dx + dy * dy)
+            local collisionDistance = 50 -- Stała odległość kolizji
 
-            if distSq <= (touchRadius * touchRadius) then
+            if dist <= collisionDistance then
                 love.graphics.setFont(czcionka)
                 love.graphics.print("Press E to terminate", v.x, v.y - 15)
             end
@@ -234,5 +255,6 @@ function love.draw()
         love.graphics.setColor(1, 1, 1)
         love.graphics.setFont(czcionka)
         love.graphics.print("Game Over", love.graphics.getWidth() / 2 - 60, love.graphics.getHeight() / 2 - 60)
+        love.graphics.print("Press R to retry!", love.graphics.getWidth() / 2 - 60, love.graphics.getHeight() / 2 + 60)
     end
 end

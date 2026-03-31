@@ -32,6 +32,7 @@ function love.load()
     time_to_spawn = 2
     xd = 0
     delete = false
+    close_to_end = false
     czcionka = love.graphics.newFont(32)
 end
 
@@ -87,7 +88,7 @@ function love.update(dt)
             local dx = player.x - v.x
             local dy = player.y - v.y
             local distSq = dx * dx + dy * dy
-            local touchRadius = playerRadius + virusRadius
+            local touchRadius = 40
 
             if distSq <= (touchRadius * touchRadius) then
                 if love.keyboard.isDown("e") then
@@ -106,6 +107,12 @@ function love.update(dt)
         else
             delete = false
             xd = 0
+        end
+
+        if cpuUsage >= 80 then
+            close_to_end = true
+        else
+            close_to_end = false
         end
     end
 end
@@ -132,7 +139,12 @@ function love.draw()
     love.graphics.setFont(czcionka)
     love.graphics.print("FPS:" .. love.timer.getFPS(), 650, 10)
     -- Tło
-    love.graphics.setBackgroundColor(0.2, 0.4, 0.8) -- A soft blue
+    if close_to_end then
+        local red = 0.5 + math.sin(love.timer.getTime() * 5) * 10
+        love.graphics.setBackgroundColor(red, 0.1, 0.1)
+    else
+        love.graphics.setBackgroundColor(0.2, 0.4, 0.8) -- A soft blue
+    end
 
     if stan == "game" then
         cpuFillWidth = math.min(200, cpuUsage * 2)
@@ -172,7 +184,7 @@ function love.draw()
             local dx = player.x - v.x
             local dy = player.y - v.y
             local distSq = dx * dx + dy * dy
-            local touchRadius = playerRadius + virusRadius
+            local touchRadius = 40
 
             if distSq <= (touchRadius * touchRadius) then
                 if (player.x - v.x <= 15 and player.y - v.y <= 15) or (player.x - v.x >= 15 and player.y - v.y >= 15) then
@@ -187,7 +199,16 @@ function love.draw()
         love.graphics.rectangle("line", 10, 10, 200, 30)
 
         -- Pasek
-        love.graphics.setColor(1, 0.8, 0)
+        if cpuUsage >= 80 then
+            local cpuRed = math.random()
+            local cpuGreen = math.random()
+            local cpuBlue = math.random()
+            love.graphics.setColor(cpuColor, cpuGreen, cpuBlue)
+        elseif cpuUsage >= 50 then
+            love.graphics.setColor(0, 1, 0)
+        else
+            love.graphics.setColor(1, 1, 0)
+        end
         love.graphics.rectangle("fill", 10, 10, cpuFillWidth, 30)
 
         -- HP Ramka

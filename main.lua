@@ -74,6 +74,10 @@ function love.update(dt)
             stan = "game_over"
         end
 
+        if cpuUsage <= 0 then
+            stan = "game_win"
+        end
+
         local pulse = player.hp * 1.5 + math.sin(love.timer.getTime() * 5) * 10
         shaders.light:send("light_radius", math.abs(pulse))
         shaders.light:send("light_center", { player.x, player.y })
@@ -90,7 +94,7 @@ function love.update(dt)
             local dist = math.sqrt(dx * dx + dy * dy)
             local collisionDistance = 50 -- Stała odległość kolizji
 
-            if dist <= collisionDistance then
+            if dist <= collisionDistance and cpuUsage >= 10 then
                 if love.keyboard.isDown("e") then
                     table.remove(viruses, i)
                     delete = true
@@ -169,6 +173,14 @@ function love.draw()
         love.graphics.setBackgroundColor(red, 0.1, 0.1)
     else
         love.graphics.setBackgroundColor(0.2, 0.4, 0.8) -- A soft blue
+    end
+
+    if stan == "game_win" then
+        love.graphics.setBackgroundColor(0, 1, 0)
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.setFont(czcionka)
+        love.graphics.print("You Win!", love.graphics.getWidth() / 2 - 60, love.graphics.getHeight() / 2 - 60)
+        love.graphics.print("Press R to retry!", love.graphics.getWidth() / 2 - 60, love.graphics.getHeight() / 2 + 60)
     end
 
     if stan == "game" then

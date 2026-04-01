@@ -79,7 +79,7 @@ function love.update(dt)
         end
 
         local pulse = player.hp * 1.5 + math.sin(love.timer.getTime() * 5) * 10
-        shaders.light:send("light_radius", math.abs(pulse))
+        shaders.light:send("light_radius", math.max(5, pulse))
         shaders.light:send("light_center", { player.x, player.y })
 
         local playerScale = 3
@@ -94,7 +94,7 @@ function love.update(dt)
             local dist = math.sqrt(dx * dx + dy * dy)
             local collisionDistance = 50 -- Stała odległość kolizji
 
-            if dist <= collisionDistance and cpuUsage >= 10 then
+            if dist <= collisionDistance and gameTimer >= 20 then
                 if love.keyboard.isDown("e") then
                     table.remove(viruses, i)
                     delete = true
@@ -169,7 +169,7 @@ function love.draw()
     love.graphics.print("FPS:" .. love.timer.getFPS(), 650, 10)
     -- Tło
     if close_to_end then
-        local red = 0.5 + math.sin(love.timer.getTime() * 5) * 10
+        local red = 0.5 + math.sin(love.timer.getTime() * 5) * 0.5
         love.graphics.setBackgroundColor(red, 0.1, 0.1)
     else
         love.graphics.setBackgroundColor(0.2, 0.4, 0.8) -- A soft blue

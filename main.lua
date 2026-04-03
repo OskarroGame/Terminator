@@ -3,6 +3,18 @@ function love.load()
     love.graphics.setDefaultFilter("nearest", "nearest")
     love.window.setIcon(love.image.newImageData("icon.png"))
     love.mouse.setVisible(false)
+    love.window.setTitle("Virus")
+
+    if stan == "game" then
+        audio = love.audio.newSource("Lukrembo - Jay (freetouse.com).mp3", "stream")
+        audio:play()
+        audio:setVolume(0.5)
+        if not audio:isPlaying() then
+            second_audio = love.audio.newSource("Hazelwood - Coming Of Age (freetouse.com).mp3", "stream")
+            second_audio:play()
+            second_audio:setVolume(0.5)
+        end
+    end
 
     shaders = require("shaders")
     virusSprite = love.graphics.newImage("Violet_Virus.png")

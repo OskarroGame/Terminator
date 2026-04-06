@@ -5,16 +5,8 @@ function love.load()
     love.mouse.setVisible(false)
     love.window.setTitle("Virus")
 
-    if stan == "game" then
-        audio = love.audio.newSource("Lukrembo - Jay (freetouse.com).mp3", "stream")
-        audio:play()
-        audio:setVolume(0.5)
-        if not audio:isPlaying() then
-            second_audio = love.audio.newSource("Hazelwood - Coming Of Age (freetouse.com).mp3", "stream")
-            second_audio:play()
-            second_audio:setVolume(0.5)
-        end
-    end
+    audio = love.audio.newSource("Lukrembo - Jay (freetouse.com).mp3", "stream")
+    second_audio = love.audio.newSource("Hazelwood - Coming Of Age (freetouse.com).mp3", "stream")
 
     shaders = require("shaders")
     virusSprite = love.graphics.newImage("Violet_Virus.png")
@@ -50,6 +42,13 @@ end
 
 function love.update(dt)
     if stan == "game" then
+        audio:play()
+        audio:setVolume(0.5)
+        if not audio:isPlaying() then
+            second_audio = love.audio.newSource("Hazelwood - Coming Of Age (freetouse.com).mp3", "stream")
+            second_audio:play()
+            second_audio:setVolume(0.5)
+        end
         cpuUsage = #viruses
         gameTimer = gameTimer + dt
         timer = timer + dt

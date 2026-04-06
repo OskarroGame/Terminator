@@ -43,11 +43,10 @@ end
 function love.update(dt)
     if stan == "game" then
         audio:play()
-        audio:setVolume(0.5)
+        audio:setVolume(0.25)
         if not audio:isPlaying() then
-            second_audio = love.audio.newSource("Hazelwood - Coming Of Age (freetouse.com).mp3", "stream")
             second_audio:play()
-            second_audio:setVolume(0.5)
+            second_audio:setVolume(0.25)
         end
         cpuUsage = #viruses
         gameTimer = gameTimer + dt
@@ -89,33 +88,41 @@ function love.update(dt)
             stan = "game_win"
         end
 
-        local pulse = player.hp * 1.5 + math.sin(love.timer.getTime() * 5) * 10
+        local pulse = math.max(10, player.hp * 1.5 + math.sin(love.timer.getTime() * 5) * 10)
         shaders.light:send("light_radius", math.max(5, pulse))
         shaders.light:send("light_center", { player.x, player.y })
 
         local playerScale = 3
         local virusScale = 5
-        local playerRadius = (player.sprite:getWidth() * playerScale) / 2
+        -- Używamy stałej, małej odległości kolizji (gdy sprite'y prawie się stykają)
+        local collisionDistance = 25
 
+        local minDist = math.huge
         for i = #viruses, 1, -1 do
             local v = viruses[i]
 
             local dx = player.x - v.x
             local dy = player.y - v.y
             local dist = math.sqrt(dx * dx + dy * dy)
-            local collisionDistance = 50 -- Stała odległość kolizji
 
-            if dist <= collisionDistance and gameTimer >= 20 then
+            local attackDistance = 60 -- Zwiększone, żeby wirus "dosięgał" gracza
+            local attackPower = 5     -- Zabierze 20 HP na sekundę
+
+            if dist <= attackDistance then
                 if love.keyboard.isDown("e") then
                     table.remove(viruses, i)
                     delete = true
                     xd = 0.1
                 else
-                    player.hp = player.hp - 1 * dt -- Wirus gryzie
+                    player.hp = player.hp - attackPower * dt
                     delete = false
                 end
             end
         end
+
+        -- Trzymaj gracza na ekranie (boundary collision)
+        local playerHalfWidth = (player.sprite:getWidth() * playerScale) / 2
+        local playerHalfHeight = (player.sprite:getHeight() * playerScale) / 2
 
         if xd > 0 then
             xd = xd - dt
@@ -202,7 +209,6 @@ function love.draw()
         local ox = player.sprite:getWidth() / 2
         local oy = player.sprite:getHeight() / 2
 
-
         -- Gracz
         if delete == true then
             love.graphics.setShader(shaders.whiteout)
@@ -227,11 +233,17 @@ function love.draw()
             end
         end
 
+        local playerScale = 3
+        local virusScale = 5
+        local playerRadius = (player.sprite:getWidth() * playerScale) / 2
+        local virusRadius = (virusSprite:getWidth() * virusScale) / 2
+        -- Ta sama odległość kolizji co w love.update (z mnożnikiem 0.3)
+        local collisionDistance = (playerRadius + virusRadius) * 0.3
+
         for i, v in ipairs(viruses) do
             local dx = player.x - v.x
             local dy = player.y - v.y
             local dist = math.sqrt(dx * dx + dy * dy)
-            local collisionDistance = 50 -- Stała odległość kolizji
 
             if dist <= collisionDistance then
                 love.graphics.setFont(czcionka)

@@ -10,6 +10,7 @@ function love.load()
 
     shaders = require("shaders")
     virusSprite = love.graphics.newImage("Violet_Virus.png")
+    baranekSprite = love.graphics.newImage("sheep(good virus).png")
     player = {
         x = love.graphics.getWidth() / 2,
         y = love.graphics.getHeight() / 2,
@@ -23,7 +24,6 @@ function love.load()
         x = math.random(0, love.graphics.getWidth() - 100),
         y = math.random(0, love.graphics.getHeight() - 50),
         type = "violet",
-        sprite = virusSprite
     }
     table.insert(viruses, wirus)
 
@@ -64,8 +64,7 @@ function love.update(dt)
                 x = math.random(0, math.abs(love.graphics.getWidth() - 100)),
                 y = math.random(0, math.abs(love.graphics.getHeight() - 50)),
                 type =
-                "violet",
-                sprite = virusSprite
+                    "violet" or "baranek",
             }
             table.insert(viruses, nowy)
             timer = 0
@@ -92,6 +91,19 @@ function love.update(dt)
         shaders.light:send("light_radius", math.max(5, pulse))
         shaders.light:send("light_center", { player.x, player.y })
 
+        -- Supermoc baranka
+        for i, v in ipairs(viruses) do
+            if v.type == "baranek" then
+                if love.keyboard.isDown("b") then
+                    table.remove(viruses, i)
+                    table.remove(viruses, math.random(1, #viruses))
+                    delete = true
+                    xd = 0.1
+                end
+            end
+        end
+
+        -- kolizje z wirusami
         local playerScale = 3
         local virusScale = 5
         -- Używamy stałej, małej odległości kolizji (gdy sprite'y prawie się stykają)
@@ -149,7 +161,6 @@ function love.update(dt)
                 x = math.random(0, love.graphics.getWidth() - 100),
                 y = math.random(0, love.graphics.getHeight() - 50),
                 type = "violet",
-                sprite = virusSprite
             }
             table.insert(viruses, wirus)
             timer = 0
@@ -226,10 +237,15 @@ function love.draw()
         -- Wirusy (przed nakładką — w kole światła widać je normalnie przez wycięcie)
         love.graphics.setColor(1, 1, 1)
         for i, v in ipairs(viruses) do
-            local vox = v.sprite:getWidth() / 2
-            local voy = v.sprite:getHeight() / 2
+            local vox = virusSprite:getWidth() / 2
+            local voy = virusSprite:getHeight() / 2
+            local baranekVox = baranekSprite:getWidth() / 2
+            local baranekVoy = baranekSprite:getHeight() / 2
             if v.type == "violet" then
-                love.graphics.draw(v.sprite, v.x, v.y, 0, 5, 5, vox, voy)
+                love.graphics.draw(virusSprite, v.x, v.y, 0, 5, 5, vox, voy)
+            end
+            if v.type == "baranek" then
+                love.graphics.draw(baranekSprite, player.x - 60, player.y, 0, 5, 5, baranekVox, baranekVoy)
             end
         end
 

@@ -23,11 +23,12 @@ function love.load()
     wirus = {
         x = math.random(0, love.graphics.getWidth() - 100),
         y = math.random(0, love.graphics.getHeight() - 50),
-        type = "violet",
+        type = "violet" or "baranek",
     }
     table.insert(viruses, wirus)
 
     stan = "game"
+    type_of_virus = 0
     cpuUsage = 0
     cpuFillWidth = math.min(200, cpuUsage * 2)
     cpuUsage = #viruses
@@ -35,6 +36,7 @@ function love.load()
     gameTimer = 0
     time_to_spawn = 2
     xd = 0
+    real_type_of_virus = ""
     delete = false
     close_to_end = false
     czcionka = love.graphics.newFont(32)
@@ -47,6 +49,12 @@ function love.update(dt)
         if not audio:isPlaying() then
             second_audio:play()
             second_audio:setVolume(0.25)
+        end
+        type_of_virus = math.random(1, 10)
+        if type_of_virus == 1 then
+            real_type_of_virus = "baranek"
+        else
+            real_type_of_virus = "violet"
         end
         cpuUsage = #viruses
         gameTimer = gameTimer + dt
@@ -63,7 +71,7 @@ function love.update(dt)
             nowy = {
                 x = math.random(0, math.abs(love.graphics.getWidth() - 100)),
                 y = math.random(0, math.abs(love.graphics.getHeight() - 50)),
-                type = "violet" or "baranek",
+                type = real_type_of_virus
             }
             table.insert(viruses, nowy)
             timer = 0
@@ -159,7 +167,7 @@ function love.update(dt)
             wirus = {
                 x = math.random(0, love.graphics.getWidth() - 100),
                 y = math.random(0, love.graphics.getHeight() - 50),
-                type = "violet",
+                type = real_type_of_virus,
             }
             table.insert(viruses, wirus)
             timer = 0
@@ -244,7 +252,7 @@ function love.draw()
                 love.graphics.draw(virusSprite, v.x, v.y, 0, 5, 5, vox, voy)
             end
             if v.type == "baranek" then
-                love.graphics.draw(baranekSprite, player.x - 60, player.y, 0, 5, 5, baranekVox, baranekVoy)
+                love.graphics.draw(baranekSprite, player.x - 160, player.y, 0, 5, 5, baranekVox, baranekVoy)
             end
         end
 

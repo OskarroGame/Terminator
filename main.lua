@@ -63,8 +63,7 @@ function love.update(dt)
             nowy = {
                 x = math.random(0, math.abs(love.graphics.getWidth() - 100)),
                 y = math.random(0, math.abs(love.graphics.getHeight() - 50)),
-                type =
-                    "violet" or "baranek",
+                type = "violet" or "baranek",
             }
             table.insert(viruses, nowy)
             timer = 0

@@ -35,6 +35,7 @@ function love.load()
     timer = 0
     gameTimer = 0
     time_to_spawn = 2
+    points = 0
     xd = 0
     real_type_of_virus = ""
     delete = false
@@ -90,7 +91,7 @@ function love.update(dt)
             stan = "game_over"
         end
 
-        if cpuUsage <= 0 then
+        if points >= 300 then
             stan = "game_win"
         end
 
@@ -105,6 +106,7 @@ function love.update(dt)
                     table.remove(viruses, i)
                     table.remove(viruses, math.random(1, #viruses))
                     delete = true
+                    points = points + 15
                     xd = 0.1
                 end
             end
@@ -131,6 +133,7 @@ function love.update(dt)
                 if love.keyboard.isDown("e") then
                     table.remove(viruses, i)
                     delete = true
+                    points = points + 15
                     xd = 0.1
                 else
                     player.hp = player.hp - attackPower * dt
@@ -203,6 +206,7 @@ function love.draw()
 
     love.graphics.setFont(czcionka)
     love.graphics.print("FPS:" .. love.timer.getFPS(), 650, 10)
+    love.graphics.print("Points: " .. points, 300, 10)
     -- Tło
     if close_to_end then
         local red = 0.5 + math.sin(love.timer.getTime() * 5) * 0.5

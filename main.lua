@@ -11,6 +11,7 @@ function love.load()
     shaders = require("shaders")
     virusSprite = love.graphics.newImage("Violet_Virus.png")
     baranekSprite = love.graphics.newImage("sheep(good virus).png")
+    Ice_cream_popup = love.graphics.newImage("Ice-cream-pop-up.png")
     player = {
         x = love.graphics.getWidth() / 2,
         y = love.graphics.getHeight() / 2,
@@ -18,6 +19,12 @@ function love.load()
         sprite = love.graphics.newImage("Gracz.png"),
         hp = 100
     }
+    popups_to_add = {
+        x = math.random(0, love.graphics.getWidth() - 100),
+        y = math.random(0, love.graphics.getHeight() - 50),
+        type = "ice_cream"
+    }
+    popups = {}
     viruses = {}
 
     wirus = {
@@ -93,6 +100,10 @@ function love.update(dt)
 
         if points >= 300 then
             stan = "game_win"
+        end
+
+        if points >= 150 then
+            table.insert(popups, popups_to_add)
         end
 
         local pulse = math.max(10, player.hp * 1.5 + math.sin(love.timer.getTime() * 5) * 10)
@@ -275,6 +286,13 @@ function love.draw()
             if dist <= collisionDistance then
                 love.graphics.setFont(czcionka)
                 love.graphics.print("Press E to terminate", v.x, v.y - 15)
+            end
+        end
+
+        -- Popup'y
+        for i, p in ipairs(popups) do
+            if p.type == "ice_cream" then
+                love.graphics.draw(Ice_cream_popup, p.x, p.y, 0, 4, 4)
             end
         end
 

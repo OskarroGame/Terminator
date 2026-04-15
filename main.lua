@@ -19,11 +19,6 @@ function love.load()
         sprite = love.graphics.newImage("Gracz.png"),
         hp = 100
     }
-    popups_to_add = {
-        x = math.random(0, love.graphics.getWidth() - 100),
-        y = math.random(0, love.graphics.getHeight() - 50),
-        type = "ice_cream"
-    }
     popups = {}
     viruses = {}
 
@@ -44,6 +39,7 @@ function love.load()
     time_to_spawn = 2
     points = 0
     xd = 0
+    popup_timer = 0
     real_type_of_virus = ""
     delete = false
     close_to_end = false
@@ -103,7 +99,16 @@ function love.update(dt)
         end
 
         if points >= 150 then
-            table.insert(popups, popups_to_add)
+            popup_timer = popup_timer + dt
+            if popup_timer >= 5 then
+                new_popup = {
+                    x = math.random(0, math.abs(love.graphics.getWidth() - 100)),
+                    y = math.random(0, math.abs(love.graphics.getHeight() - 50)),
+                    type = "ice_cream"
+                }
+                table.insert(popups, new_popup)
+                popup_timer = 0
+            end
         end
 
         local pulse = math.max(10, player.hp * 1.5 + math.sin(love.timer.getTime() * 5) * 10)

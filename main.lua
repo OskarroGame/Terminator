@@ -2,11 +2,12 @@ function love.load()
     math.randomseed(os.time())
     love.graphics.setDefaultFilter("nearest", "nearest")
     love.window.setIcon(love.image.newImageData("icon.png"))
-    love.mouse.setVisible(false)
+    love.mouse.setVisible(true)
     love.window.setTitle("Virus")
 
     audio = love.audio.newSource("Lukrembo - Jay (freetouse.com).mp3", "stream")
     second_audio = love.audio.newSource("Hazelwood - Coming Of Age (freetouse.com).mp3", "stream")
+    close_popup_audio = love.audio.newSource("App_Exit_Notification.mp3", "stream")
 
     shaders = require("shaders")
     virusSprite = love.graphics.newImage("Violet_Virus.png")
@@ -38,11 +39,11 @@ function love.load()
     timer = 0
     gameTimer = 0
     time_to_spawn = 2
-    points = 0
+    points = 150
     xd = 0
     popup_timer = 0
     num_of_popup = 0
-    type_of_popup
+    type_of_popup = ""
     type_of_virus = ""
     delete = false
     close_to_end = false
@@ -224,6 +225,30 @@ end
 
 function move_down(dt)
     player.y = player.y + player.spd * dt
+end
+
+function love.mousepressed(mx, my, button)
+    if button == 1 then
+        local s = 4 -- TWOJA SKALA Z DRAW
+
+        for i = #popups, 1, -1 do
+            local p = popups[i]
+
+            -- Skoro nie masz ox i oy, obliczenie jest proste:
+            -- Pozycja popupu + (współrzędna z LibreSprite * skala)
+            local bx = p.x + (53 * s)
+            local by = p.y + (1 * s)
+
+            -- Rozmiar przycisku X (jeśli ma 8px w LibreSprite, to w grze ma 8*s)
+            local bSize = 8 * s
+
+            if mx >= bx and mx <= bx + bSize and my >= by and my <= by + bSize then
+                table.remove(popups, i)
+                close_popup_audio:play()
+                break
+            end
+        end
+    end
 end
 
 function love.draw()

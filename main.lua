@@ -12,6 +12,7 @@ function love.load()
     virusSprite = love.graphics.newImage("Violet_Virus.png")
     baranekSprite = love.graphics.newImage("sheep(good virus).png")
     Ice_cream_popup = love.graphics.newImage("Ice-cream-pop-up.png")
+    Hacked_popup = love.graphics.newImage("Hacked-pop-up.png")
     player = {
         x = love.graphics.getWidth() / 2,
         y = love.graphics.getHeight() / 2,
@@ -30,7 +31,7 @@ function love.load()
     table.insert(viruses, wirus)
 
     stan = "game"
-    type_of_virus = 0
+    num_of_virus = 0
     cpuUsage = 0
     cpuFillWidth = math.min(200, cpuUsage * 2)
     cpuUsage = #viruses
@@ -40,7 +41,9 @@ function love.load()
     points = 0
     xd = 0
     popup_timer = 0
-    real_type_of_virus = ""
+    num_of_popup = 0
+    type_of_popup
+    type_of_virus = ""
     delete = false
     close_to_end = false
     czcionka = love.graphics.newFont(32)
@@ -99,12 +102,18 @@ function love.update(dt)
         end
 
         if points >= 150 then
+            num_of_popup = math.random(1, 10)
+            if num_of_popup == 1 or num_of_popup == 2 then
+                type_of_popup = "ice-cream"
+            else
+                type_of_popup = "hacked"
+            end
             popup_timer = popup_timer + dt
             if popup_timer >= 5 then
                 new_popup = {
                     x = math.random(0, math.abs(love.graphics.getWidth() - 100)),
                     y = math.random(0, math.abs(love.graphics.getHeight() - 50)),
-                    type = "ice_cream"
+                    type = type_of_popup
                 }
                 table.insert(popups, new_popup)
                 popup_timer = 0
@@ -298,6 +307,9 @@ function love.draw()
         for i, p in ipairs(popups) do
             if p.type == "ice_cream" then
                 love.graphics.draw(Ice_cream_popup, p.x, p.y, 0, 4, 4)
+            end
+            if p.type == "hacked" then
+                love.graphics.draw(Hacked_popup, p.x, p.y, 0, 4, 4)
             end
         end
 

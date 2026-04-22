@@ -24,6 +24,13 @@ function love.load()
     popups = {}
     viruses = {}
 
+    player_frames = {}
+    player_frames.idle = {
+        love.graphics.newImage("idle1.png"),
+        love.graphics.newImage("idle2.png"),
+        love.graphics.newImage("idle3.png")
+    }
+
     wirus = {
         x = math.random(0, love.graphics.getWidth() - 100),
         y = math.random(0, love.graphics.getHeight() - 50),
@@ -43,6 +50,8 @@ function love.load()
     xd = 0
     popup_timer = 0
     num_of_popup = 0
+    current_frame = 1
+    anim_timer = 0
     type_of_popup = ""
     type_of_virus = ""
     delete = false
@@ -58,6 +67,15 @@ function love.update(dt)
             second_audio:play()
             second_audio:setVolume(0.25)
         end
+        anim_timer = anim_timer + dt
+        if anim_timer > 0.1 then -- 0.2 to prędkość (zmieniaj, by było szybciej/wolniej)
+            anim_timer = 0
+            current_frame = current_frame + 1
+            if current_frame > #player_frames.idle then
+                current_frame = 1
+            end
+        end
+
         type_of_virus = math.random(1, 10)
         if type_of_virus == 1 then
             real_type_of_virus = "baranek"
@@ -285,7 +303,10 @@ function love.draw()
         if delete == true then
             love.graphics.setShader(shaders.whiteout)
         end
-        love.graphics.draw(player.sprite, player.x, player.y, 0, 3, 3, ox, oy)
+        local img = player_frames.idle[current_frame]
+        local ox = img:getWidth() / 2
+        local oy = img:getHeight() / 2
+        love.graphics.draw(img, player.x, player.y, 0, 4, 4, ox, oy) -- Twoja skala 4!
         love.graphics.setShader()
         love.graphics.setShader(shaders.light)
         shaders.light:send("light_center", { player.x, player.y })

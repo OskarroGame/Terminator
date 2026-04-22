@@ -246,24 +246,25 @@ function move_down(dt)
 end
 
 function love.mousepressed(mx, my, button)
-    if button == 1 then
-        local s = 4 -- TWOJA SKALA Z DRAW
+    if stan == "game" then
+        if button == 1 then
+            local s = 4 -- TWOJA SKALA Z DRAW
+            for i = #popups, 1, -1 do
+                local p = popups[i]
 
-        for i = #popups, 1, -1 do
-            local p = popups[i]
+                -- Skoro nie masz ox i oy, obliczenie jest proste:
+                -- Pozycja popupu + (współrzędna z LibreSprite * skala)
+                local bx = p.x + (53 * s)
+                local by = p.y + (1 * s)
 
-            -- Skoro nie masz ox i oy, obliczenie jest proste:
-            -- Pozycja popupu + (współrzędna z LibreSprite * skala)
-            local bx = p.x + (53 * s)
-            local by = p.y + (1 * s)
+                -- Rozmiar przycisku X (jeśli ma 8px w LibreSprite, to w grze ma 8*s)
+                local bSize = 8 * s
 
-            -- Rozmiar przycisku X (jeśli ma 8px w LibreSprite, to w grze ma 8*s)
-            local bSize = 8 * s
-
-            if mx >= bx and mx <= bx + bSize and my >= by and my <= by + bSize then
-                table.remove(popups, i)
-                close_popup_audio:play()
-                break
+                if mx >= bx and mx <= bx + bSize and my >= by and my <= by + bSize then
+                    table.remove(popups, i)
+                    close_popup_audio:play()
+                    break
+                end
             end
         end
     end
@@ -272,9 +273,15 @@ end
 function love.draw()
     love.graphics.setColor(1, 1, 1)
 
+    if stan == "menu" then
+        love.graphics.setBackgroundColor(1, 0.3, 0)
+        love.graphics.setFont(czcionka)
+        love.graphics.print("Terminator", 250, 10)
+    end
+
     love.graphics.setFont(czcionka)
     love.graphics.print("FPS:" .. love.timer.getFPS(), 650, 10)
-    love.graphics.print("Points: " .. points, 300, 10)
+
     -- Tło
     if close_to_end then
         local red = 0.5 + math.sin(love.timer.getTime() * 5) * 0.5
@@ -292,6 +299,7 @@ function love.draw()
     end
 
     if stan == "game" then
+        love.graphics.print("Points: " .. points, 300, 10)
         cpuFillWidth = math.min(200, cpuUsage * 2)
         local playerScale = 3
         local virusScale = 5
@@ -306,7 +314,7 @@ function love.draw()
         local img = player_frames.idle[current_frame]
         local ox = img:getWidth() / 2
         local oy = img:getHeight() / 2
-        love.graphics.draw(img, player.x, player.y, 0, 4, 4, ox, oy) -- Twoja skala 4!
+        love.graphics.draw(img, player.x, player.y, 0, 4, 4, ox, oy)
         love.graphics.setShader()
         love.graphics.setShader(shaders.light)
         shaders.light:send("light_center", { player.x, player.y })
@@ -316,7 +324,7 @@ function love.draw()
         love.graphics.setColor(1, 1, 1)
 
 
-        -- Wirusy (przed nakładką — w kole światła widać je normalnie przez wycięcie)
+        -- Wirusy
         love.graphics.setColor(1, 1, 1)
         for i, v in ipairs(viruses) do
             local vox = virusSprite:getWidth() / 2
@@ -331,11 +339,7 @@ function love.draw()
             end
         end
 
-        local playerScale = 3
-        local virusScale = 5
-        local playerRadius = (player.sprite:getWidth() * playerScale) / 2
         local virusRadius = (virusSprite:getWidth() * virusScale) / 2
-        -- Ta sama odległość kolizji co w love.update (z mnożnikiem 0.3)
         local collisionDistance = (playerRadius + virusRadius) * 0.3
 
         for i, v in ipairs(viruses) do
@@ -363,12 +367,9 @@ function love.draw()
         love.graphics.setColor(0, 0, 0)
         love.graphics.rectangle("line", 10, 10, 200, 30)
 
-        -- Pasek
+        -- Pasek CPU
         if cpuUsage >= 80 then
-            local cpuRed = math.random()
-            local cpuGreen = math.random()
-            local cpuBlue = math.random()
-            love.graphics.setColor(cpuRed, cpuGreen, cpuBlue)
+            love.graphics.setColor(math.random(), math.random(), math.random())
         elseif cpuUsage >= 50 then
             love.graphics.setColor(0, 1, 0)
         else

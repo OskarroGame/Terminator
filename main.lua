@@ -7,6 +7,7 @@ function love.load()
 
     audio = love.audio.newSource("Lukrembo - Jay (freetouse.com).mp3", "stream")
     second_audio = love.audio.newSource("Hazelwood - Coming Of Age (freetouse.com).mp3", "stream")
+    heeHee = love.audio.newSource("michael-jackson-hee-hee.mp3", "stream")
     close_popup_audio = love.audio.newSource("App_Exit_Notification.mp3", "stream")
 
     shaders = require("shaders")
@@ -14,6 +15,8 @@ function love.load()
     baranekSprite = love.graphics.newImage("sheep(good virus).png")
     Ice_cream_popup = love.graphics.newImage("Ice-cream-pop-up.png")
     Hacked_popup = love.graphics.newImage("Hacked-pop-up.png")
+    playButton = love.graphics.newImage("playButton.png")
+    exitButton = love.graphics.newImage("exitButton.png")
     player = {
         x = love.graphics.getWidth() / 2,
         y = love.graphics.getHeight() / 2,
@@ -38,7 +41,7 @@ function love.load()
     }
     table.insert(viruses, wirus)
 
-    stan = "game"
+    stan = "menu"
     num_of_virus = 0
     cpuUsage = 0
     cpuFillWidth = math.min(200, cpuUsage * 2)
@@ -243,26 +246,33 @@ end
 
 function move_down(dt)
     player.y = player.y + player.spd * dt
+    heeHee:play()
 end
 
 function love.mousepressed(mx, my, button)
-    if stan == "game" then
+    if stan == "menu" then
+        if button == 1 then -- Usunąłem cudzysłów wokół 1
+            if mx >= 250 and mx <= 550 and my >= 200 and my <= 260 then
+                stan = "game"
+                if mj_sound then mj_sound:play() end -- Hee hee na start!
+                return                               -- Kończymy funkcję tutaj, żeby nie sprawdzać popupów od razu
+            end
+            if mx >= 250 and mx <= 550 and my >= 400 and my <= 460 then
+                love.event.quit()
+            end
+        end
+    elseif stan == "game" then -- Używamy elseif, żeby stany się nie gryzły
         if button == 1 then
-            local s = 4 -- TWOJA SKALA Z DRAW
+            local s = 4
             for i = #popups, 1, -1 do
                 local p = popups[i]
-
-                -- Skoro nie masz ox i oy, obliczenie jest proste:
-                -- Pozycja popupu + (współrzędna z LibreSprite * skala)
                 local bx = p.x + (53 * s)
                 local by = p.y + (1 * s)
-
-                -- Rozmiar przycisku X (jeśli ma 8px w LibreSprite, to w grze ma 8*s)
                 local bSize = 8 * s
 
                 if mx >= bx and mx <= bx + bSize and my >= by and my <= by + bSize then
                     table.remove(popups, i)
-                    close_popup_audio:play()
+                    if close_popup_audio then close_popup_audio:play() end
                     break
                 end
             end
@@ -277,6 +287,17 @@ function love.draw()
         love.graphics.setBackgroundColor(1, 0.3, 0)
         love.graphics.setFont(czcionka)
         love.graphics.print("Terminator", 250, 10)
+
+        -- Przyciski
+        love.graphics.draw(playButton, 250, 200)
+
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.rectangle("line", 250, 200, 300, 60)
+        -- Kolejny
+        love.graphics.draw(exitButton, 250, 400)
+
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.rectangle("line", 250, 400, 300, 60)
     end
 
     love.graphics.setFont(czcionka)

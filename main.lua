@@ -55,7 +55,7 @@ function love.load()
     timer = 0
     gameTimer = 0
     time_to_spawn = 2
-    points = 150
+    points = 0
     xd = 0
     popup_timer = 0
     num_of_popup = 0
@@ -244,9 +244,47 @@ function love.update(dt)
         else
             close_to_end = false
         end
+        -- Przejście z prawej na lewą
+        if player.x > love.graphics.getWidth() then
+            player.x = 0
+            -- Przejście z lewej na prawą
+        elseif player.x < 0 then
+            player.x = love.graphics.getWidth()
+        end
+
+        -- To samo dla góry i dołu (opcjonalnie)
+        if player.y > love.graphics.getHeight() then
+            player.y = 0
+        elseif player.y < 0 then
+            player.y = love.graphics.getHeight()
+        end
     end
 
     if stan == "game_over" then
+        if love.keyboard.isDown("r") then
+            -- Resetuj całą grę
+            player.hp = 100
+            player.x = love.graphics.getWidth() / 2
+            player.y = love.graphics.getHeight() / 2
+            viruses = {}
+            wirus = {
+                x = math.random(0, love.graphics.getWidth() - 100),
+                y = math.random(0, love.graphics.getHeight() - 50),
+                type = real_type_of_virus,
+            }
+            table.insert(viruses, wirus)
+            timer = 0
+            points = 0
+            gameTimer = 0
+            time_to_spawn = 2
+            cpuUsage = 0
+            xd = 0
+            delete = false
+            close_to_end = false
+            stan = "game"
+        end
+    end
+    if stan == "game_win" then
         if love.keyboard.isDown("r") then
             -- Resetuj całą grę
             player.hp = 100
@@ -266,208 +304,217 @@ function love.update(dt)
             xd = 0
             delete = false
             close_to_end = false
+            points = 0
             stan = "game"
         end
     end
-end
 
-function move_right(dt)
-    player.x = player.x + player.spd * dt
-end
+    function move_right(dt)
+        player.x = player.x + player.spd * dt
+    end
 
-function move_left(dt)
-    player.x = player.x - player.spd * dt
-end
+    function move_left(dt)
+        player.x = player.x - player.spd * dt
+    end
 
-function move_up(dt)
-    player.y = player.y - player.spd * dt
-end
+    function move_up(dt)
+        player.y = player.y - player.spd * dt
+    end
 
-function move_down(dt)
-    player.y = player.y + player.spd * dt
-    heeHee:play()
-end
+    function move_down(dt)
+        player.y = player.y + player.spd * dt
+        heeHee:play()
+    end
 
-function love.mousepressed(mx, my, button)
-    if stan == "menu" then
-        if button == 1 then -- Usunąłem cudzysłów wokół 1
-            if mx >= 250 and mx <= 550 and my >= 200 and my <= 260 then
-                stan = "game"
-                if mj_sound then mj_sound:play() end -- Hee hee na start!
-                return                               -- Kończymy funkcję tutaj, żeby nie sprawdzać popupów od razu
+    function love.mousepressed(mx, my, button)
+        if stan == "menu" then
+            if button == 1 then -- Usunąłem cudzysłów wokół 1
+                if mx >= 250 and mx <= 550 and my >= 200 and my <= 260 then
+                    stan = "game"
+                    if mj_sound then mj_sound:play() end -- Hee hee na start!
+                    return                               -- Kończymy funkcję tutaj, żeby nie sprawdzać popupów od razu
+                end
+                if mx >= 250 and mx <= 550 and my >= 400 and my <= 460 then
+                    love.event.quit()
+                end
             end
-            if mx >= 250 and mx <= 550 and my >= 400 and my <= 460 then
-                love.event.quit()
-            end
-        end
-    elseif stan == "game" then -- Używamy elseif, żeby stany się nie gryzły
-        if button == 1 then
-            local s = 4
-            for i = #popups, 1, -1 do
-                local p = popups[i]
-                local bx = p.x + (53 * s)
-                local by = p.y + (1 * s)
-                local bSize = 8 * s
+        elseif stan == "game" then -- Używamy elseif, żeby stany się nie gryzły
+            if button == 1 then
+                local s = 4
+                for i = #popups, 1, -1 do
+                    local p = popups[i]
+                    local bx = p.x + (53 * s)
+                    local by = p.y + (1 * s)
+                    local bSize = 8 * s
 
-                if mx >= bx and mx <= bx + bSize and my >= by and my <= by + bSize then
-                    table.remove(popups, i)
-                    if close_popup_audio then close_popup_audio:play() end
-                    break
+                    if mx >= bx and mx <= bx + bSize and my >= by and my <= by + bSize then
+                        table.remove(popups, i)
+                        if close_popup_audio then close_popup_audio:play() end
+                        break
+                    end
                 end
             end
         end
     end
-end
 
-function love.draw()
-    love.graphics.setColor(1, 1, 1)
+    function love.draw()
+        love.graphics.setColor(1, 1, 1)
 
-    if stan == "menu" then
-        love.graphics.setBackgroundColor(1, 0.3, 0)
+        if stan == "menu" then
+            love.graphics.setBackgroundColor(1, 0.3, 0)
+            love.graphics.setFont(czcionka)
+            love.graphics.print("Terminator", 250, 10)
+
+            -- Przyciski
+            love.graphics.draw(playButton, 250, 200)
+
+            love.graphics.setColor(1, 1, 1)
+            love.graphics.rectangle("line", 250, 200, 300, 60)
+            -- Kolejny
+            love.graphics.draw(exitButton, 250, 400)
+
+            love.graphics.setColor(1, 1, 1)
+            love.graphics.rectangle("line", 250, 400, 300, 60)
+        end
+
         love.graphics.setFont(czcionka)
-        love.graphics.print("Terminator", 250, 10)
+        love.graphics.print("FPS:" .. love.timer.getFPS(), 650, 10)
 
-        -- Przyciski
-        love.graphics.draw(playButton, 250, 200)
-
-        love.graphics.setColor(1, 1, 1)
-        love.graphics.rectangle("line", 250, 200, 300, 60)
-        -- Kolejny
-        love.graphics.draw(exitButton, 250, 400)
-
-        love.graphics.setColor(1, 1, 1)
-        love.graphics.rectangle("line", 250, 400, 300, 60)
-    end
-
-    love.graphics.setFont(czcionka)
-    love.graphics.print("FPS:" .. love.timer.getFPS(), 650, 10)
-
-    -- Tło
-    if close_to_end then
-        local red = 0.5 + math.sin(love.timer.getTime() * 5) * 0.5
-        love.graphics.setBackgroundColor(red, 0.1, 0.1)
-    else
-        love.graphics.setBackgroundColor(0.2, 0.4, 0.8) -- A soft blue
-    end
-
-    if stan == "game_win" then
-        love.graphics.setBackgroundColor(0, 1, 0)
-        love.graphics.setColor(1, 1, 1)
-        love.graphics.setFont(czcionka)
-        love.graphics.print("You Win!", love.graphics.getWidth() / 2 - 60, love.graphics.getHeight() / 2 - 60)
-        love.graphics.print("Press R to retry!", love.graphics.getWidth() / 2 - 60, love.graphics.getHeight() / 2 + 60)
-    end
-
-    if stan == "game" then
-        love.graphics.print("Points: " .. points, 300, 10)
-        cpuFillWidth = math.min(200, cpuUsage * 2)
-        local playerScale = 3
-        local virusScale = 5
-        local playerRadius = (player.sprite:getWidth() * playerScale) / 2
-        local ox = player.sprite:getWidth() / 2
-        local oy = player.sprite:getHeight() / 2
-
-        -- Gracz
-        if delete == true then
-            love.graphics.setShader(shaders.whiteout)
-        end
-        local img = player_frames.idle[current_frame]
-        local offset_y = 0 -- domyślnie brak poprawki
-
-        if isMoving then
-            img = player_frames.walk[current_frame]
-            offset_y = 7 * 4 -- jeśli w LibreSprite postać jest o 2px za nisko, a skala to 4
-        end
-
-        local ox = img:getWidth() / 2
-        local oy = img:getHeight() / 2
-
-        -- Dodajemy offset_y do pozycji rysowania
-        love.graphics.draw(img, player.x, player.y - offset_y, 0, 4 * player.direction, 4, ox, oy)
-        love.graphics.setShader()
-        love.graphics.setShader(shaders.light)
-        shaders.light:send("light_center", { player.x, player.y })
-        love.graphics.setColor(0, 0, 0, 0.75)
-        love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
-        love.graphics.setShader()
-        love.graphics.setColor(1, 1, 1)
-
-
-        -- Wirusy
-        love.graphics.setColor(1, 1, 1)
-        for i, v in ipairs(viruses) do
-            local vox = virusSprite:getWidth() / 2
-            local voy = virusSprite:getHeight() / 2
-            local baranekVox = baranekSprite:getWidth() / 2
-            local baranekVoy = baranekSprite:getHeight() / 2
-            if v.type == "violet" then
-                love.graphics.draw(virusSprite, v.x, v.y, 0, 5, 5, vox, voy)
-            end
-            if v.type == "baranek" then
-                love.graphics.draw(baranekSprite, player.x - 160, player.y, 0, 5, 5, baranekVox, baranekVoy)
-            end
-        end
-
-        local virusRadius = (virusSprite:getWidth() * virusScale) / 2
-        local collisionDistance = (playerRadius + virusRadius) * 0.3
-
-        for i, v in ipairs(viruses) do
-            local dx = player.x - v.x
-            local dy = player.y - v.y
-            local dist = math.sqrt(dx * dx + dy * dy)
-
-            if dist <= collisionDistance then
-                love.graphics.setFont(czcionka)
-                love.graphics.print("Press E to terminate", v.x, v.y - 15)
-            end
-        end
-
-        -- Popup'y
-        for i, p in ipairs(popups) do
-            if p.type == "ice_cream" then
-                love.graphics.draw(Ice_cream_popup, p.x, p.y, 0, 4, 4)
-            end
-            if p.type == "hacked" then
-                love.graphics.draw(Hacked_popup, p.x, p.y, 0, 4, 4)
-            end
-        end
-
-        -- Ramka
-        love.graphics.setColor(0, 0, 0)
-        love.graphics.rectangle("line", 10, 10, 200, 30)
-
-        -- Pasek CPU
-        if cpuUsage >= 80 then
-            love.graphics.setColor(math.random(), math.random(), math.random())
-        elseif cpuUsage >= 50 then
-            love.graphics.setColor(0, 1, 0)
+        -- Tło
+        if close_to_end then
+            local red = 0.5 + math.sin(love.timer.getTime() * 5) * 0.5
+            love.graphics.setBackgroundColor(red, 0.1, 0.1)
         else
-            love.graphics.setColor(1, 1, 0)
+            love.graphics.setBackgroundColor(0.2, 0.4, 0.8) -- A soft blue
         end
-        love.graphics.rectangle("fill", 10, 10, cpuFillWidth, 30)
 
-        -- HP Ramka
-        love.graphics.setColor(1, 1, 1)
-        love.graphics.rectangle("line", 10, 560, 200, 30)
-
-        -- Pasek HP
-        if player.hp <= 50 then
-            love.graphics.setColor(1, 1, 0.25)
-        else
-            love.graphics.setColor(1, 0.2, 0)
+        if stan == "game_win" then
+            love.graphics.setBackgroundColor(0, 1, 0)
+            love.graphics.setColor(1, 1, 1)
+            love.graphics.setFont(czcionka)
+            love.graphics.print("You Win!", love.graphics.getWidth() / 2 - 60, love.graphics.getHeight() / 2 - 60)
+            love.graphics.print("Press R to retry!", love.graphics.getWidth() / 2 - 60,
+                love.graphics.getHeight() / 2 + 60)
         end
-        if player.hp <= 35 then
-            love.graphics.setColor(0, 0.8, 1)
-        end
-        love.graphics.rectangle("fill", 10, 560, player.hp * 2, 30)
-    end
 
-    -- Koniec gry
-    if stan == "game_over" then
-        love.graphics.setBackgroundColor(0, 0.2, 0.2)
-        love.graphics.setColor(1, 1, 1)
-        love.graphics.setFont(czcionka)
-        love.graphics.print("Game Over", love.graphics.getWidth() / 2 - 60, love.graphics.getHeight() / 2 - 60)
-        love.graphics.print("Press R to retry!", love.graphics.getWidth() / 2 - 60, love.graphics.getHeight() / 2 + 60)
+        if stan == "game" then
+            love.graphics.print("Points: " .. points, 300, 10)
+            cpuFillWidth = math.min(200, cpuUsage * 2)
+            local playerScale = 3
+            local virusScale = 5
+            local playerRadius = (player.sprite:getWidth() * playerScale) / 2
+            local ox = player.sprite:getWidth() / 2
+            local oy = player.sprite:getHeight() / 2
+
+            -- Gracz
+            if delete == true then
+                love.graphics.setShader(shaders.whiteout)
+            end
+            local img = player_frames.idle[current_frame]
+            local offset_y = 0
+            local offset_x = 0
+
+            if isMoving then
+                img = player_frames.walk[current_frame]
+                offset_y = 7 * 4
+                -- Używamy kierunku, żeby offset zawsze przesuwał w dobrą stronę!
+                -- Spróbuj mniejszej liczby, np. 2 lub 3 zamiast 17
+                offset_x = (2 * 4) * player.direction
+            end
+
+            local ox = img:getWidth() / 2
+            local oy = img:getHeight() / 2
+
+            -- Rysowanie
+            love.graphics.draw(img, player.x + offset_x, player.y - offset_y, 0, 4 * player.direction, 4, ox, oy)
+
+
+            love.graphics.setShader()
+            love.graphics.setShader(shaders.light)
+            shaders.light:send("light_center", { player.x, player.y })
+            love.graphics.setColor(0, 0, 0, 0.75)
+            love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
+            love.graphics.setShader()
+            love.graphics.setColor(1, 1, 1)
+
+
+            -- Wirusy
+            love.graphics.setColor(1, 1, 1)
+            for i, v in ipairs(viruses) do
+                local vox = virusSprite:getWidth() / 2
+                local voy = virusSprite:getHeight() / 2
+                local baranekVox = baranekSprite:getWidth() / 2
+                local baranekVoy = baranekSprite:getHeight() / 2
+                if v.type == "violet" then
+                    love.graphics.draw(virusSprite, v.x, v.y, 0, 5, 5, vox, voy)
+                end
+                if v.type == "baranek" then
+                    love.graphics.draw(baranekSprite, player.x - 160, player.y, 0, 5, 5, baranekVox, baranekVoy)
+                end
+            end
+
+            local virusRadius = (virusSprite:getWidth() * virusScale) / 2
+            local collisionDistance = (playerRadius + virusRadius) * 0.3
+
+            for i, v in ipairs(viruses) do
+                local dx = player.x - v.x
+                local dy = player.y - v.y
+                local dist = math.sqrt(dx * dx + dy * dy)
+
+                if dist <= collisionDistance then
+                    love.graphics.setFont(czcionka)
+                    love.graphics.print("Press E to terminate", v.x, v.y - 15)
+                end
+            end
+
+            -- Popup'y
+            for i, p in ipairs(popups) do
+                if p.type == "ice_cream" then
+                    love.graphics.draw(Ice_cream_popup, p.x, p.y, 0, 4, 4)
+                end
+                if p.type == "hacked" then
+                    love.graphics.draw(Hacked_popup, p.x, p.y, 0, 4, 4)
+                end
+            end
+
+            -- Ramka
+            love.graphics.setColor(0, 0, 0)
+            love.graphics.rectangle("line", 10, 10, 200, 30)
+
+            -- Pasek CPU
+            if cpuUsage >= 80 then
+                love.graphics.setColor(math.random(), math.random(), math.random())
+            elseif cpuUsage >= 50 then
+                love.graphics.setColor(0, 1, 0)
+            else
+                love.graphics.setColor(1, 1, 0)
+            end
+            love.graphics.rectangle("fill", 10, 10, cpuFillWidth, 30)
+
+            -- HP Ramka
+            love.graphics.setColor(1, 1, 1)
+            love.graphics.rectangle("line", 10, 560, 200, 30)
+
+            -- Pasek HP
+            if player.hp <= 50 then
+                love.graphics.setColor(1, 1, 0.25)
+            else
+                love.graphics.setColor(1, 0.2, 0)
+            end
+            if player.hp <= 35 then
+                love.graphics.setColor(0, 0.8, 1)
+            end
+            love.graphics.rectangle("fill", 10, 560, player.hp * 2, 30)
+        end
+
+        -- Koniec gry
+        if stan == "game_over" then
+            love.graphics.setBackgroundColor(0, 0.2, 0.2)
+            love.graphics.setColor(1, 1, 1)
+            love.graphics.setFont(czcionka)
+            love.graphics.print("Game Over", love.graphics.getWidth() / 2 - 60, love.graphics.getHeight() / 2 - 60)
+            love.graphics.print("Press R to retry!", love.graphics.getWidth() / 2 - 60,
+                love.graphics.getHeight() / 2 + 60)
+        end
     end
 end

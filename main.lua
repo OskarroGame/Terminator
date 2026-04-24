@@ -24,6 +24,7 @@ function love.load()
         sprite = love.graphics.newImage("Gracz.png"),
         hp = 100
     }
+    player.direction = 1
     popups = {}
     viruses = {}
 
@@ -33,7 +34,12 @@ function love.load()
         love.graphics.newImage("idle2.png"),
         love.graphics.newImage("idle3.png")
     }
-
+    player_frames.walk = {
+        love.graphics.newImage("walk-right1.png"),
+        love.graphics.newImage("walk-right2.png"),
+        love.graphics.newImage("walk-right3.png"),
+        love.graphics.newImage("walk-right4.png")
+    }
     wirus = {
         x = math.random(0, love.graphics.getWidth() - 100),
         y = math.random(0, love.graphics.getHeight() - 50),
@@ -57,6 +63,7 @@ function love.load()
     anim_timer = 0
     type_of_popup = ""
     type_of_virus = ""
+    isMoving = false
     delete = false
     close_to_end = false
     czcionka = love.graphics.newFont(32)
@@ -70,11 +77,35 @@ function love.update(dt)
             second_audio:play()
             second_audio:setVolume(0.25)
         end
+        -- 1. Sprawdzamy, czy stan ruchu się zmienił
+        local wasMoving = isMoving
+        isMoving = love.keyboard.isDown("a", "d", "w", "s")
+
+        -- 2. Jeśli właśnie zacząłeś iść lub właśnie stanąłeś - zresetuj animację!
+        if wasMoving ~= isMoving then
+            current_frame = 1
+            anim_timer = 0
+        end
+
+        -- 3. Timer animacji (zawsze na zewnątrz, żeby zawsze liczył czas)
         anim_timer = anim_timer + dt
-        if anim_timer > 0.1 then -- 0.2 to prędkość (zmieniaj, by było szybciej/wolniej)
+
+        -- Wybieramy prędkość: chodzenie może być szybsze (0.1), idle wolniejsze (0.2)
+        local speed = isMoving and 0.1 or 0.2
+
+        if anim_timer >= speed then
             anim_timer = 0
             current_frame = current_frame + 1
-            if current_frame > #player_frames.idle then
+
+            -- Sprawdzamy ile klatek ma OBECNA animacja
+            local max_frames = 0
+            if isMoving then
+                max_frames = #player_frames.walk
+            else
+                max_frames = #player_frames.idle
+            end
+
+            if current_frame > max_frames then
                 current_frame = 1
             end
         end
@@ -106,8 +137,16 @@ function love.update(dt)
             timer = 0
         end
 
-        if love.keyboard.isDown("d") then move_right(dt) end
-        if love.keyboard.isDown("a") then move_left(dt) end
+        if love.keyboard.isDown("d") then
+            move_right(dt)
+            isMoving = true
+            player.direction = 1
+        end
+        if love.keyboard.isDown("a") then
+            move_left(dt)
+            isMoving = true
+            player.direction = -1
+        end
         if love.keyboard.isDown("w") then move_up(dt) end
         if love.keyboard.isDown("s") then move_down(dt) end
 
@@ -333,9 +372,18 @@ function love.draw()
             love.graphics.setShader(shaders.whiteout)
         end
         local img = player_frames.idle[current_frame]
+        local offset_y = 0 -- domyślnie brak poprawki
+
+        if isMoving then
+            img = player_frames.walk[current_frame]
+            offset_y = 7 * 4 -- jeśli w LibreSprite postać jest o 2px za nisko, a skala to 4
+        end
+
         local ox = img:getWidth() / 2
         local oy = img:getHeight() / 2
-        love.graphics.draw(img, player.x, player.y, 0, 4, 4, ox, oy)
+
+        -- Dodajemy offset_y do pozycji rysowania
+        love.graphics.draw(img, player.x, player.y - offset_y, 0, 4 * player.direction, 4, ox, oy)
         love.graphics.setShader()
         love.graphics.setShader(shaders.light)
         shaders.light:send("light_center", { player.x, player.y })

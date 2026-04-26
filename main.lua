@@ -13,6 +13,7 @@ function love.load()
     shaders = require("shaders")
     virusSprite = love.graphics.newImage("Violet_Virus.png")
     baranekSprite = love.graphics.newImage("sheep(good virus).png")
+    fakeVirusSprite = love.graphics.newImage("fakeVirus.png")
     Ice_cream_popup = love.graphics.newImage("Ice-cream-pop-up.png")
     Hacked_popup = love.graphics.newImage("Hacked-pop-up.png")
     playButton = love.graphics.newImage("playButton.png")
@@ -59,6 +60,7 @@ function love.load()
     xd = 0
     popup_timer = 0
     num_of_popup = 0
+    real_type_of_popup = ""
     current_frame = 1
     anim_timer = 0
     type_of_popup = ""
@@ -113,8 +115,16 @@ function love.update(dt)
         type_of_virus = math.random(1, 10)
         if type_of_virus == 1 then
             real_type_of_virus = "baranek"
+        elseif type_of_virus == 2 then
+            real_type_of_virus = "fake"
         else
             real_type_of_virus = "violet"
+        end
+        num_of_popup = math.random(1, 3)
+        if num_of_popup == 1 then
+            real_type_of_popup = "hacked"
+        else
+            real_type_of_popup = "ice-cream"
         end
         cpuUsage = #viruses
         gameTimer = gameTimer + dt
@@ -212,18 +222,45 @@ function love.update(dt)
             local dy = player.y - v.y
             local dist = math.sqrt(dx * dx + dy * dy)
 
-            local attackDistance = 60 -- Zwiększone, żeby wirus "dosięgał" gracza
-            local attackPower = 5     -- Zabierze 20 HP na sekundę
+            if v.type == "violet" then
+                local attackDistance = 60 -- Zwiększone, żeby wirus "dosięgał" gracza
+                local attackPower = 5     -- Zabierze 20 HP na sekundę
 
-            if dist <= attackDistance then
-                if love.keyboard.isDown("e") then
-                    table.remove(viruses, i)
-                    delete = true
-                    points = points + 15
-                    xd = 0.1
-                else
-                    player.hp = player.hp - attackPower * dt
-                    delete = false
+                if dist <= attackDistance then
+                    if love.keyboard.isDown("e") then
+                        table.remove(viruses, i)
+                        delete = true
+                        points = points + 15
+                        xd = 0.1
+                    else
+                        player.hp = player.hp - attackPower * dt
+                        delete = false
+                    end
+                end
+            end
+            if v.type == "fake" then
+                local attackDistance = 60
+
+                if dist <= attackDistance then
+                    if love.keyboard.isDown("e") then
+                        table.remove(viruses, i)
+                        delete = true
+                        points = points + 15
+                        xd = 0.1
+                    else
+                        -- 1. Usuwamy oryginał
+                        table.remove(viruses, i)
+
+                        -- 2. Tworzymy 3 nowe wirusy w losowych miejscach
+                        for x = 1, 3 do
+                            local klon = {
+                                x = v.x + math.random(-50, 50), -- trochę obok starego
+                                y = v.y + math.random(-50, 50),
+                                type = "violet"                 -- lub inny typ
+                            }
+                            table.insert(viruses, klon)
+                        end
+                    end
                 end
             end
         end
@@ -445,11 +482,16 @@ function love.update(dt)
                 local voy = virusSprite:getHeight() / 2
                 local baranekVox = baranekSprite:getWidth() / 2
                 local baranekVoy = baranekSprite:getHeight() / 2
+                local fVox = fakeVirusSprite:getWidth() / 2
+                local fVoy = fakeVirusSprite:getHeight() / 2
                 if v.type == "violet" then
                     love.graphics.draw(virusSprite, v.x, v.y, 0, 5, 5, vox, voy)
                 end
                 if v.type == "baranek" then
                     love.graphics.draw(baranekSprite, player.x - 160, player.y, 0, 5, 5, baranekVox, baranekVoy)
+                end
+                if v.type == "fake" then
+                    love.graphics.draw(fakeVirusSprite, v.x, v.y, 0, 5, 5, fVox, fVoy)
                 end
             end
 

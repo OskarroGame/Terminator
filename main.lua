@@ -436,6 +436,11 @@ function love.update(dt)
 
         if stan == "game" then
             love.graphics.print("Points: " .. points, 300, 10)
+            love.graphics.print("GOALS:", 500, 260)
+            love.graphics.print("- Get 500 points!", 500, 290)
+            love.graphics.print("- Full CPU bar = bad", 481, 320)
+            love.graphics.print("CPU:", 10, 10)
+            love.graphics.print("HP:", 10, 525)
             cpuFillWidth = math.min(200, cpuUsage * 2)
             local playerScale = 3
             local virusScale = 5
